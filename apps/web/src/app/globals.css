@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-bg: #07070f;
+    --brand-card: #0e0e1a;
+    --brand-elevated: #16162a;
+    --brand-border: #2a2a45;
+    --brand-purple: #7c6af7;
+    --brand-muted: #8e8ea8;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    background-color: var(--brand-bg);
+    color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--brand-card);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--brand-border);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--brand-purple);
+  }
+}
+
+@layer utilities {
+  .glow-purple {
+    box-shadow: 0 0 24px rgba(124, 106, 247, 0.25);
+  }
+  .border-brand {
+    border-color: var(--brand-border);
+  }
+}
