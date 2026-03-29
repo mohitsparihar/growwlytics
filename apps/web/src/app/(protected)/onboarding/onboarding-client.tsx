@@ -124,6 +124,34 @@ function ConnectButton({
   );
 }
 
+function SetupInstructions({ isError = false }: { isError?: boolean }) {
+  return (
+    <div className={`mt-6 rounded-xl p-5 text-sm ${isError ? 'bg-red-500/10 border border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'bg-[#18181b] border border-[#27272a]'}`}>
+      <h3 className={`font-bold mb-3 flex items-center gap-2 ${isError ? 'text-red-400' : 'text-amber-400'}`}>
+        {isError ? "🚨 Missing Facebook Page Detected" : "⚠️ Quick Setup Required"}
+      </h3>
+      <p className="text-brand-muted mb-4 leading-relaxed">
+        Meta (Instagram) requires all apps to connect through a Facebook Page to access your advanced analytics and insights. It only takes 30 seconds to set up on your phone:
+      </p>
+      
+      <div className="space-y-4 text-brand-muted leading-relaxed">
+        <div>
+          <strong className="text-[#ececf1] block text-xs uppercase tracking-wider mb-1">1. Switch to Professional</strong>
+          Open Instagram <strong className="font-semibold text-gray-300">Settings &gt; Account type and tools &gt; Switch to Professional Account</strong>.
+        </div>
+        <div>
+          <strong className="text-[#ececf1] block text-xs uppercase tracking-wider mb-1">2. Create a Bridge Page</strong>
+          Go to your Instagram <strong className="font-semibold text-gray-300">Edit Profile &gt; Page &gt; Create Facebook Page</strong>. <br/><span className="text-xs opacity-80">(You never need to post on this page, it just acts as a technical bridge!)</span>
+        </div>
+        <div>
+          <strong className="text-[#ececf1] block text-xs uppercase tracking-wider mb-1">3. Clear Cache & Connect</strong>
+          If you already tried connecting, <a href="https://www.facebook.com/settings?tab=business_tools" target="_blank" rel="noreferrer" className="text-brand-purple hover:text-white transition-colors underline underline-offset-2">remove Growwlytics from Facebook</a> first to clear your cached permissions. Then click connect above and <strong className="text-[#ececf1]">check all boxes</strong> in the popup!
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ConnectedCard({
   account,
   syncState,
@@ -333,10 +361,13 @@ export default function OnboardingPage() {
                 onError={(msg) => setErrorMsg(msg)}
               />
 
-              <p className="mt-4 text-xs text-brand-muted text-center leading-relaxed">
-                Requires an{" "}
-                <span className="text-white">Instagram Business or Creator</span>{" "}
-                account linked to a Facebook Page. We never post on your behalf.
+              {(() => {
+                const isPageError = urlError === "instagram_failed" && searchParams.get("detail")?.includes("No Facebook Pages found");
+                return <SetupInstructions isError={!!isPageError} />;
+              })()}
+
+              <p className="mt-4 text-xs text-brand-muted text-center opacity-60">
+                We only read analytics data. We will never post on your behalf.
               </p>
             </>
           ) : (
