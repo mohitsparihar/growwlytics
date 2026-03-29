@@ -11,15 +11,18 @@
 
 import crypto from "crypto";
 
-const KEY_HEX = process.env.ENCRYPTION_KEY;
-if (!KEY_HEX) throw new Error("Missing ENCRYPTION_KEY env var");
-if (KEY_HEX.length !== 64)
-  throw new Error("ENCRYPTION_KEY must be 64 hex chars (32 bytes)");
-
-const KEY = Buffer.from(KEY_HEX, "hex");
 const IV_LENGTH = 16; // AES block size
 
+function aesKey(): Buffer {
+  const keyHex = process.env.ENCRYPTION_KEY?.trim();
+  if (!keyHex) throw new Error("Missing ENCRYPTION_KEY env var");
+  if (keyHex.length !== 64)
+    throw new Error("ENCRYPTION_KEY must be 64 hex chars (32 bytes)");
+  return Buffer.from(keyHex, "hex");
+}
+
 export function encrypt(plaintext: string): string {
+  const KEY = aesKey();
   const iv = crypto.randomBytes(IV_LENGTH);
   const cipher = crypto.createCipheriv("aes-256-cbc", KEY, iv);
   const encrypted = Buffer.concat([
@@ -30,6 +33,7 @@ export function encrypt(plaintext: string): string {
 }
 
 export function decrypt(ciphertext: string): string {
+  const KEY = aesKey();
   const colonIdx = ciphertext.indexOf(":");
   if (colonIdx === -1) throw new Error("Invalid ciphertext — missing IV separator");
   const iv = Buffer.from(ciphertext.slice(0, colonIdx), "hex");

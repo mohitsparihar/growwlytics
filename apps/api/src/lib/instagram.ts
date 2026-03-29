@@ -5,7 +5,7 @@
  * uniformly without checking every return value.
  */
 
-const GRAPH = "https://graph.facebook.com/v18.0";
+const GRAPH = "https://graph.facebook.com/v21.0";
 
 // ---------------------------------------------------------------------------
 // Types

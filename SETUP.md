@@ -26,7 +26,11 @@ Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to the same v
 
 **Run migrations**
 
-In the Supabase dashboard go to SQL Editor and run each file in order:
+Supabase does not create app tables automatically. You must apply the SQL in this repo.
+
+**Option A — one paste (easiest):** open `supabase/apply_all_migrations.sql` in your editor, copy everything, then in the Supabase dashboard go to **SQL Editor** → paste → **Run**. Use this on a **new** project (or before any Growwlytics tables exist).
+
+**Option B — three steps:** in **SQL Editor**, run each file **in order**, one at a time:
 
 ```
 supabase/migrations/001_initial_schema.sql
@@ -34,7 +38,9 @@ supabase/migrations/002_razorpay_credits.sql
 supabase/migrations/003_instagram_posts_insights.sql
 ```
 
-Paste the contents of each file and click Run. Run them one at a time, in order.
+After success, **Table Editor** should list tables such as `profiles`, `credits`, `content_briefs`, `connected_accounts`, etc.
+
+If you **signed up before** running migrations, your user may exist in **Authentication** but have no `profiles` row yet. After migrations, either sign up again with a new email or run a backfill (ask in chat / see SQL comments in migration 001 for the trigger that normally creates `profiles` + `credits`).
 
 **Enable email auth**
 
@@ -56,8 +62,11 @@ Instagram's API requires a Facebook App and a Business/Creator account linked to
 
 Inside your app dashboard:
 
-1. Add Product → **Instagram Graph API** → Set Up
-2. You do not need to add Instagram Basic Display — Graph API is what you want
+1. Add Product → **Instagram Graph API** → Set Up (or the dashboard flow that adds **Instagram API with Facebook Login**)
+2. Add **Facebook Login** (or **Facebook Login for Business** if the dashboard offers it) and complete its settings
+3. You do not need Instagram Basic Display for this app
+
+If OAuth shows **Invalid Scopes** for `instagram_*` / `pages_*`, your app is not allowed to request those permissions yet. This repo only requests `instagram_basic` and `pages_read_engagement` (per Meta’s get-started). Ensure the app type is **Business**, the Instagram + Facebook Login products are added, and your Meta **Use cases** include access to Instagram / Pages APIs for development. After App Review you can extend scopes (e.g. insights) in `apps/api/src/routes/auth.ts`.
 
 **Configure OAuth redirect URI**
 

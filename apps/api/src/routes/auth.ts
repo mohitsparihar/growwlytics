@@ -40,13 +40,13 @@ const REDIRECT_URI = process.env.IG_REDIRECT_URI!;
 const STATE_SECRET = process.env.JWT_SECRET!;
 const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
 
-// Scopes required for Instagram Graph API insights
-const IG_SCOPES = [
-  "instagram_basic",
-  "instagram_manage_insights",
-  "pages_show_list",
-  "pages_read_engagement",
-].join(",");
+// Minimal scopes per Meta "Instagram API with Facebook Login" get-started:
+// https://developers.facebook.com/docs/instagram-platform/instagram-api-with-facebook-login/get-started
+// pages_show_list was removed by Meta; pages_read_engagement is its replacement.
+// Requesting instagram_manage_insights before it is enabled on your app (App Review / Use cases)
+// makes Meta reject the whole list as "Invalid Scopes".
+// Insights calls in the API fail soft without those permissions (zeros returned).
+const IG_SCOPES = ["instagram_basic", "pages_read_engagement"].join(",");
 
 // ---------------------------------------------------------------------------
 // State helpers (HMAC-signed, stateless)
@@ -135,9 +135,7 @@ router.get("/instagram", async (req: Request, res: Response): Promise<void> => {
     state,
   });
 
-  res.redirect(
-    `https://www.facebook.com/v18.0/dialog/oauth?${params}`
-  );
+  res.redirect(`https://www.facebook.com/v21.0/dialog/oauth?${params}`);
 });
 
 // ---------------------------------------------------------------------------

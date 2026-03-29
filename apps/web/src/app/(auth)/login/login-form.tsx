@@ -2,50 +2,36 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { hasPublicSupabaseEnv } from "@/lib/supabase/env-public";
+import { sanitizeAfterAuthRedirect } from "@/lib/safe-redirect";
 
-export default function SignupPage() {
+export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const authConfigured = hasPublicSupabaseEnv();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    searchParams.get("error") === "auth_callback_failed"
+      ? "Authentication failed. Please try again."
+      : null
+  );
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-
     if (!authConfigured) {
-      setError("Sign-up is not configured on this deployment yet.");
+      setError("Sign-in is not configured on this deployment yet.");
       return;
     }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
-      return;
-    }
-
     setLoading(true);
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        // Supabase will POST to this URL after the user confirms their email.
-        emailRedirectTo: `${location.origin}/auth/callback?next=/onboarding`,
-      },
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       setError(error.message);
@@ -53,21 +39,19 @@ export default function SignupPage() {
       return;
     }
 
-    // If email confirmation is disabled in the Supabase project settings,
-    // the user is signed in immediately and we push to onboarding.
-    // If confirmation is enabled, they'll see the check-email notice.
-    router.push("/onboarding");
+    const next = sanitizeAfterAuthRedirect(searchParams.get("next"));
+    router.push(next);
     router.refresh();
   }
 
   return (
     <>
-      <h1 className="text-xl font-semibold text-gray-900 mb-1">Create your account</h1>
-      <p className="text-sm text-gray-500 mb-6">Start with 3 free content plans</p>
+      <h1 className="text-xl font-semibold text-gray-900 mb-1">Welcome back</h1>
+      <p className="text-sm text-gray-500 mb-6">Sign in to your account</p>
 
       {!authConfigured && (
         <p className="mb-4 text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
-          New accounts are not available on this preview. See our{" "}
+          Authentication is not enabled on this preview. You can still read our{" "}
           <Link href="/privacy" className="font-medium underline">
             privacy policy
           </Link>
@@ -105,29 +89,10 @@ export default function SignupPage() {
           <input
             id="password"
             type="password"
-            autoComplete="new-password"
+            autoComplete="current-password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
-            placeholder="Min. 8 characters"
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="confirmPassword"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Confirm password
-          </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            autoComplete="new-password"
-            required
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
             className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
             placeholder="••••••••"
           />
@@ -144,17 +109,17 @@ export default function SignupPage() {
           disabled={loading || !authConfigured}
           className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed transition"
         >
-          {loading ? "Creating account…" : "Create account"}
+          {loading ? "Signing in…" : "Sign in"}
         </button>
       </form>
 
       <p className="mt-6 text-center text-sm text-gray-500">
-        Already have an account?{" "}
+        Don&apos;t have an account?{" "}
         <Link
-          href="/login"
+          href="/signup"
           className="font-medium text-indigo-600 hover:text-indigo-500"
         >
-          Sign in
+          Sign up
         </Link>
       </p>
     </>

@@ -13,6 +13,11 @@ export default function AuthLayout({
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
         {children}
       </div>
+      <p className="mt-6 text-center text-xs text-gray-500">
+        <a href="/privacy" className="text-indigo-600 hover:underline">
+          Privacy Policy
+        </a>
+      </p>
     </div>
   );
 }

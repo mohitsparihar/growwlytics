@@ -1,10 +1,21 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { hasPublicSupabaseEnv } from "@/lib/supabase/env-public";
 
 const AUTH_ROUTES = ["/login", "/signup"];
 const PROTECTED_ROUTES = ["/dashboard", "/onboarding"];
 
 export async function middleware(request: NextRequest) {
+  if (!hasPublicSupabaseEnv()) {
+    const { pathname } = request.nextUrl;
+    if (PROTECTED_ROUTES.some((r) => pathname.startsWith(r))) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("next", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    return NextResponse.next({ request });
+  }
+
   // Start with a passthrough response so we can mutate cookies on it.
   let supabaseResponse = NextResponse.next({ request });
 

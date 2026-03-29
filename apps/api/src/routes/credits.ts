@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import type { Orders } from "razorpay/dist/types/orders.js";
 import { supabase } from "../lib/supabase.js";
-import { razorpay, verifyPaymentSignature } from "../lib/razorpay.js";
+import { getRazorpay, verifyPaymentSignature } from "../lib/razorpay.js";
 import { requireAuth, type AuthRequest } from "../middleware/auth.js";
 import { CREDIT_PACKS, getPackById } from "../config/creditPacks.js";
 
@@ -65,7 +65,7 @@ router.post("/purchase", async (req: Request, res: Response): Promise<void> => {
 
   let order: Orders.RazorpayOrder;
   try {
-    order = (await razorpay.orders.create({
+    order = (await getRazorpay().orders.create({
       amount: pack.amountPaise,
       currency: "INR",
       receipt: `grwl_${userId.slice(0, 8)}_${Date.now()}`,

@@ -6,10 +6,16 @@
     "apps/*",
     "packages/*"
   ],
+  "overrides": {
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace=apps/web\" \"npm run dev --workspace=apps/api\"",
     "build": "npm run build --workspace=packages/types && npm run build --workspace=apps/web && npm run build --workspace=apps/api",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "start": "node serve-production.mjs",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "verify:supabase": "node scripts/verify-supabase-url.mjs"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

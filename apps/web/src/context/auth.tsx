@@ -9,6 +9,7 @@ import {
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
+import { hasPublicSupabaseEnv } from "@/lib/supabase/env-public";
 
 interface AuthContextValue {
   user: User | null;
@@ -26,6 +27,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!hasPublicSupabaseEnv()) {
+      setLoading(false);
+      return;
+    }
+
     const supabase = createClient();
 
     // Hydrate on mount.
@@ -48,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
+    if (!hasPublicSupabaseEnv()) return;
     const supabase = createClient();
     await supabase.auth.signOut();
   }, []);

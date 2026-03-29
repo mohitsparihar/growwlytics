@@ -1,14 +1,25 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
-const keyId = process.env.RAZORPAY_KEY_ID;
-const keySecret = process.env.RAZORPAY_KEY_SECRET;
-
-if (!keyId || !keySecret) {
-  throw new Error("Missing RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET");
+function razorpayKeys(): { keyId: string; keySecret: string } {
+  const keyId = process.env.RAZORPAY_KEY_ID?.trim();
+  const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
+  if (!keyId || !keySecret) {
+    throw new Error("Missing RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET");
+  }
+  return { keyId, keySecret };
 }
 
-export const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
+let razorpayClient: Razorpay | null = null;
+
+/** Lazily created so the API can boot without Razorpay keys until a payment route runs. */
+export function getRazorpay(): Razorpay {
+  if (!razorpayClient) {
+    const { keyId, keySecret } = razorpayKeys();
+    razorpayClient = new Razorpay({ key_id: keyId, key_secret: keySecret });
+  }
+  return razorpayClient;
+}
 
 /**
  * Verifies the HMAC-SHA256 signature Razorpay sends after a successful payment.
@@ -19,9 +30,10 @@ export function verifyPaymentSignature(
   razorpayPaymentId: string,
   razorpaySignature: string
 ): boolean {
+  const { keySecret } = razorpayKeys();
   const body = `${razorpayOrderId}|${razorpayPaymentId}`;
   const expectedSignature = crypto
-    .createHmac("sha256", keySecret!)
+    .createHmac("sha256", keySecret)
     .update(body)
     .digest("hex");
 
