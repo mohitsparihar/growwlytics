@@ -13,12 +13,14 @@ const require = createRequire(import.meta.url);
 const { createApiApp } = require("./apps/api/dist/create-app.js");
 
 const webDir = path.join(__dirname, "apps", "web");
-const hostname = process.env.HOSTNAME ?? "0.0.0.0";
 const port = Number(process.env.PORT ?? 3000);
+// Always bind all interfaces. Render/K8s set HOSTNAME to an internal pod name — using it for
+// listen() would not accept traffic from the platform load balancer (blank page / connection issues).
+const bindHost = "0.0.0.0";
 
 const nextApp = next({
   dev: false,
-  hostname,
+  hostname: bindHost,
   port,
   dir: webDir,
 });
@@ -31,6 +33,6 @@ const server = express();
 server.use(createApiApp());
 server.all("*", (req, res) => handle(req, res));
 
-server.listen(port, hostname, () => {
-  console.log(`Ready on http://${hostname}:${port}`);
+server.listen(port, bindHost, () => {
+  console.log(`Listening on ${bindHost}:${port} (public URL is your Render hostname)`);
 });

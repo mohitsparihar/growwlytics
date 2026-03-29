@@ -63,6 +63,23 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
+  /**
+   * Dev only: proxy /api/* to Express so the browser can use https://localhost:3000 for Meta OAuth
+   * (Facebook Login often requires HTTPS redirect URIs). Set NEXT_PUBLIC_API_URL and IG_REDIRECT_URI
+   * to that HTTPS origin; keep INTERNAL_API_ORIGIN pointing at the real API (default http://127.0.0.1:4000).
+   */
+  async rewrites() {
+    if (process.env.NODE_ENV === "production") return [];
+    const internal = (
+      process.env.INTERNAL_API_ORIGIN ?? "http://127.0.0.1:4000"
+    ).replace(/\/$/, "");
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${internal}/api/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

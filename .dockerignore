@@ -1,0 +1,26 @@
+# Dependencies & build output (rebuilt in the image)
+node_modules
+**/node_modules
+.next
+**/.next
+dist
+**/dist
+
+# Git & tooling
+.git
+.github
+.cursor
+.agents
+*.md
+!README.md
+
+# Local env (set secrets in Render dashboard)
+.env
+.env.*
+!.env.example
+
+# Misc
+.DS_Store
+npm-debug.log*
+coverage
+terminals

@@ -1,13 +1,13 @@
 # Render Blueprint: connect this Git repo → new Blueprint → auto-deploy on every push to the tracked branch.
 # https://render.com/docs/blueprint-spec
+# Docker: see Dockerfile. Set secrets (Supabase, etc.) in the Render dashboard.
 services:
   - type: web
     name: growwlytics
-    runtime: node
+    runtime: docker
     plan: free
-    rootDir: .
-    buildCommand: npm ci && npm run build
-    startCommand: npm start
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV

@@ -18,4 +18,13 @@ server.on("error", (err: NodeJS.ErrnoException) => {
   process.exit(1);
 });
 
+function shutdown(signal: string) {
+  console.log(`\nAPI received ${signal}, closing…`);
+  server.close(() => process.exit(0));
+  setTimeout(() => process.exit(1), 10_000).unref();
+}
+
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+
 export default app;

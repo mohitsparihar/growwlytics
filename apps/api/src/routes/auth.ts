@@ -29,14 +29,17 @@ import {
   exchangeForLongLivedToken,
   getInstagramAccount,
 } from "../lib/instagram.js";
+import {
+  getIgAppId,
+  getIgRedirectUri,
+  isValidFacebookAppId,
+} from "../lib/instagram-config.js";
 
 const router = Router();
 
 // ---------------------------------------------------------------------------
-// Env guards
+// Env (read per OAuth request so .env changes apply without restart)
 // ---------------------------------------------------------------------------
-const APP_ID = process.env.IG_APP_ID!;
-const REDIRECT_URI = process.env.IG_REDIRECT_URI!;
 const STATE_SECRET = process.env.JWT_SECRET!;
 const APP_URL = process.env.APP_URL ?? "http://localhost:3000";
 
@@ -125,11 +128,35 @@ router.get("/instagram", async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
+  const appId = getIgAppId();
+  const redirectUri = getIgRedirectUri();
+
+  if (!isValidFacebookAppId(appId)) {
+    res.status(500).json({
+      error: "Instagram login is not configured correctly",
+      hint:
+        "IG_APP_ID must be the numeric Facebook App ID from developers.facebook.com → Your App → App settings → Basic. " +
+        "Do not use the Instagram Basic Display \"Instagram App ID\" (different product). " +
+        "Remove quotes/spaces. If you deploy the API separately, set IG_APP_ID on the API host.",
+    });
+    return;
+  }
+
+  if (!redirectUri) {
+    res.status(500).json({
+      error: "Instagram login is not configured correctly",
+      hint:
+        "IG_REDIRECT_URI is missing. It must exactly match a valid OAuth redirect URI in Meta → Facebook Login → Settings. " +
+        "Meta often requires HTTPS (e.g. https://localhost:3000/api/auth/instagram/callback with `npm run dev:https` and NEXT_PUBLIC_API_URL set to that origin).",
+    });
+    return;
+  }
+
   const state = createState(user.id);
 
   const params = new URLSearchParams({
-    client_id: APP_ID,
-    redirect_uri: REDIRECT_URI,
+    client_id: appId,
+    redirect_uri: redirectUri,
     scope: IG_SCOPES,
     response_type: "code",
     state,

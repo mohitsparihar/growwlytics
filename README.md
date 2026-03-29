@@ -143,8 +143,8 @@ Key variables:
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Web | Public anon key for Supabase JS client |
 | `ANTHROPIC_API_KEY` | API | Claude content plan generation |
 | `IG_APP_ID` / `IG_APP_SECRET` | API | Facebook App credentials |
-| `IG_REDIRECT_URI` | API | Must point to `localhost:4000`, not `3000` |
+| `IG_REDIRECT_URI` | API | Must match Meta’s **Valid OAuth redirect URIs** exactly (often **HTTPS**; use `https://localhost:3000/.../callback` with `npm run dev:https` — see SETUP.md) |
 | `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` | API | Payment processing |
 | `ENCRYPTION_KEY` | API | AES-256-CBC key for token storage (64 hex chars) |
 | `JWT_SECRET` | API | Signs OAuth state tokens |
-| `APP_URL` | API | Frontend URL for post-OAuth redirects |
+| `APP_URL` | API | Frontend URL for post-OAuth redirects (use `https://localhost:3000` when using HTTPS dev) |

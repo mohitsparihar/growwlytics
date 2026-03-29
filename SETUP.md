@@ -70,8 +70,19 @@ If OAuth shows **Invalid Scopes** for `instagram_*` / `pages_*`, your app is not
 
 **Configure OAuth redirect URI**
 
-1. App Dashboard → Facebook Login → Settings (or App Settings → Basic → Valid OAuth Redirect URIs)
-2. Add: `http://localhost:4000/api/auth/instagram/callback`
+Meta often requires **HTTPS** for valid OAuth redirect URIs (not plain `http://` except sometimes for `localhost` in older setups). Use an HTTPS URL that matches how you run the app.
+
+**Option A — HTTPS on localhost (recommended when Meta enforces SSL)**
+
+1. In `.env`: `APP_URL=https://localhost:3000`, `NEXT_PUBLIC_API_URL=https://localhost:3000`, and `IG_REDIRECT_URI=https://localhost:3000/api/auth/instagram/callback`.
+2. Run the app with **`npm run dev:https`** from the repo root (Next.js serves HTTPS; `/api/*` is proxied to Express on port 4000).
+3. App Dashboard → Facebook Login → Settings → Valid OAuth Redirect URIs → add exactly: `https://localhost:3000/api/auth/instagram/callback`
+4. Save changes. Trust the local certificate in your browser when prompted.
+
+**Option B — HTTP to API on port 4000** (only if Meta still accepts it for your app)
+
+1. Add: `http://localhost:4000/api/auth/instagram/callback`
+2. Set `IG_REDIRECT_URI` to the same string and keep `NEXT_PUBLIC_API_URL=http://localhost:4000`
 3. Save changes
 
 **Get credentials**
@@ -83,7 +94,7 @@ App Dashboard → Settings → Basic:
 | `IG_APP_ID` | App ID (top of the page) |
 | `IG_APP_SECRET` | App Secret → click Show |
 
-Set `IG_REDIRECT_URI=http://localhost:4000/api/auth/instagram/callback` — this must exactly match what you registered above.
+Set `IG_REDIRECT_URI` to the **exact** redirect URI you registered (HTTPS vs HTTP, host, port, and path must match).
 
 **Add test users**
 
@@ -171,6 +182,11 @@ JWT_SECRET=<random string>
 
 APP_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:4000
+
+# If Meta requires HTTPS for OAuth, use dev:https and instead e.g.:
+# APP_URL=https://localhost:3000
+# NEXT_PUBLIC_API_URL=https://localhost:3000
+# IG_REDIRECT_URI=https://localhost:3000/api/auth/instagram/callback
 ```
 
 ---

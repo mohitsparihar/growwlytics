@@ -5,6 +5,8 @@
  * uniformly without checking every return value.
  */
 
+import { getIgAppId, getIgAppSecret, getIgRedirectUri } from "./instagram-config.js";
+
 const GRAPH = "https://graph.facebook.com/v21.0";
 
 // ---------------------------------------------------------------------------
@@ -70,9 +72,9 @@ export async function exchangeCodeForToken(
   code: string
 ): Promise<IgTokenResponse> {
   const params = new URLSearchParams({
-    client_id: process.env.IG_APP_ID!,
-    client_secret: process.env.IG_APP_SECRET!,
-    redirect_uri: process.env.IG_REDIRECT_URI!,
+    client_id: getIgAppId(),
+    client_secret: getIgAppSecret(),
+    redirect_uri: getIgRedirectUri(),
     code,
   });
   return graphGet<IgTokenResponse>(`${GRAPH}/oauth/access_token?${params}`);
@@ -87,8 +89,8 @@ export async function exchangeForLongLivedToken(
 ): Promise<IgTokenResponse & { expires_in: number }> {
   const params = new URLSearchParams({
     grant_type: "fb_exchange_token",
-    client_id: process.env.IG_APP_ID!,
-    client_secret: process.env.IG_APP_SECRET!,
+    client_id: getIgAppId(),
+    client_secret: getIgAppSecret(),
     fb_exchange_token: shortToken,
   });
   return graphGet<IgTokenResponse & { expires_in: number }>(

@@ -1,4 +1,8 @@
-/** Base URL for the Express API. Empty in production unified deploy = same-origin relative paths. */
+/**
+ * Base URL for the Express API. Empty in production unified deploy = same-origin relative paths.
+ * For Meta/Facebook OAuth with an HTTPS redirect URI locally: set NEXT_PUBLIC_API_URL=https://localhost:3000,
+ * run `npm run dev:https` from the repo root, register that URL in Meta, and proxying in next.config handles /api/*.
+ */
 export function getApiBase(): string {
   const fromEnv = process.env.NEXT_PUBLIC_API_URL?.trim();
   if (fromEnv) return fromEnv;
