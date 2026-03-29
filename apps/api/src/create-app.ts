@@ -10,7 +10,22 @@ import instagramRouter from "./routes/instagram.js";
 export function createApiApp() {
   const app = express();
 
-  app.use(cors({ origin: process.env.APP_URL ?? "http://localhost:3000" }));
+  const allowedOrigins = process.env.CORS_ORIGINS
+    ? process.env.CORS_ORIGINS.split(",").map((o) => o.trim())
+    : [process.env.APP_URL ?? "http://localhost:3000"];
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        // Allow server-to-server requests (no origin) and listed origins
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error(`CORS: origin ${origin} not allowed`));
+        }
+      },
+      credentials: true,
+    })
+  );
   app.use(express.json());
 
   app.get("/health", (_req, res) => {
